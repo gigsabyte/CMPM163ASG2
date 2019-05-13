@@ -1,0 +1,13 @@
+{
+"companyName": "DefaultCompany",
+"productName": "CMPM Assignment 2",
+"dataUrl": "ASG2.data.unityweb",
+"wasmCodeUrl": "ASG2.wasm.code.unityweb",
+"wasmFrameworkUrl": "ASG2.wasm.framework.unityweb",
+"TOTAL_MEMORY": 268435456,
+"graphicsAPI": ["WebGL 2.0", "WebGL 1.0"],
+"webglContextAttributes": {"preserveDrawingBuffer": false},
+"splashScreenStyle": "Dark",
+"backgroundColor": "#231F20",
+"cacheControl": {"default": "must-revalidate"}
+}
