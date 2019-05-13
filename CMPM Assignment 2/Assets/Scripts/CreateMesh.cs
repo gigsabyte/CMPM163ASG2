@@ -27,10 +27,6 @@ public class CreateMesh : MonoBehaviour
         //make sure not to overwrite this mesh by copying, othere
         mesh = new Mesh(); 
         mesh.name = "Procedural Grid X";
-       // mesh.vertices = oMesh.vertices;
-       // mesh.triangles = oMesh.triangles;
-       // mesh.normals = oMesh.normals;
-       // mesh.uv = oMesh.uv;
         meshFilter.mesh = mesh; 
 
         mesh.Clear();

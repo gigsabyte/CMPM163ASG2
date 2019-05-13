@@ -82,12 +82,6 @@ public class RenderEffectBloom : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
     void OnDisable()
     {
         if (screenMat)

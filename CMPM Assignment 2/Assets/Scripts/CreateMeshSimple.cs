@@ -1,9 +1,9 @@
-﻿
-
-
-
-using System.Collections;
-using System.Collections.Generic;
+﻿/*
+ * Create Mesh Simple
+ * Generates a 150x150 mesh of vertices from a plane.
+ * Written by Angus Forbes and modified by Gigi Bachtel.
+ * 
+ */
 using UnityEngine;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
@@ -30,7 +30,7 @@ public class CreateMeshSimple : MonoBehaviour
         meshFilter.mesh = mesh; 
         mesh.Clear();
 
-
+        // create vertex grid
         Vector3[] vertices = new Vector3[(numCellsX + 1) * (numCellsZ + 1)];
         Vector2[] uv = new Vector2[vertices.Length];
 
@@ -40,6 +40,8 @@ public class CreateMeshSimple : MonoBehaviour
         float zInc = (float)zSize / (float)numCellsZ;
 
         int idx = 0;
+
+        // generate vertices
         for (int z = 0; z <= numCellsZ; z++)
         {
             for (int x = 0; x <= numCellsX; x++)
@@ -53,6 +55,7 @@ public class CreateMeshSimple : MonoBehaviour
         mesh.vertices = vertices;
         mesh.uv = uv;
 
+        // generate triangles from vertices
         int[] triangles = new int[numCellsX * numCellsZ * 6];
         int t_idx = 0;
         int v_idx = 0;
@@ -73,11 +76,5 @@ public class CreateMeshSimple : MonoBehaviour
         mesh.triangles = triangles;
         mesh.RecalculateNormals(); //much easier than doing it ourselves!
 
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }

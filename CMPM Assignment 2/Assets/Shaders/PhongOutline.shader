@@ -1,17 +1,28 @@
-﻿Shader "Custom/PhongOutline"
+﻿/*
+*	Phong Outline Shader
+*	Multi-pass shader that renders objects with Phong lighting, emissiveness, and an emissive outline.
+*	When the object is blocked by another object, the outline is still visible.
+*	Written by Gigi Bachtel. 
+*   Based on Phong and Outline shaders written byb Angus Forbes and Manu.
+*	Also used the following blog post as reference for the X-Ray component of the shader:
+*	https://lindenreid.wordpress.com/2018/03/17/x-ray-shader-tutorial-in-unity/
+*
+*/
+
+Shader "Custom/PhongOutline"
 {
     Properties
     {
         _Color ("Color", Color) = (1, 1, 1, 1) //The color of our object
-        _EmmisiveColor("Emmisive Color", Color) = (1, 1, 1, 1)
-        _Emissiveness("Emmissiveness", Range(0,10)) = 0
+        _EmmisiveColor("Emmisive Color", Color) = (1, 1, 1, 1) // emissive color
+        _Emissiveness("Emmissiveness", Range(0,10)) = 0 // how emissive
         _Shininess ("Shininess", Float) = 10 //Shininess
         _SpecColor ("Specular Color", Color) = (1, 1, 1, 1) //Specular highlights color
-        _MainTex ("Texture", 2D) = "white" {}
-		_Outline ("Outline", Float) = 0.1
-		_OutlineColor ("Outline Color", Color) = (0, 0, 0, 1)
-		_OutlineEmmisiveColor("Emmisive Color", Color) = (1, 1, 1, 1)
-        _OutlineEmissiveness("Emmissiveness", Range(0,10)) = 0
+        _MainTex ("Texture", 2D) = "white" {} // main texture
+		_Outline ("Outline", Float) = 0.1 // outline width
+		_OutlineColor ("Outline Color", Color) = (0, 0, 0, 1) // outline color
+		_OutlineEmmisiveColor("Emmisive Color", Color) = (1, 1, 1, 1) // outline emissive color
+        _OutlineEmissiveness("Emmissiveness", Range(0,10)) = 0 // how emissive outline is
     }
     SubShader
     {
@@ -19,12 +30,16 @@
         LOD 100
 		Pass
         {
+			// stencil that checks if the other pass is drawn
+			// and draws even if it the other one doesn't
 			Stencil {
 			  Ref 3
 			  Comp Greater
 			  Fail keep
 			  Pass replace
 			}
+
+			// cull front, turn off z writing, always check ztest
 			Cull Front
 			ZWrite Off
 			ZTest Always
@@ -58,7 +73,10 @@
             v2f vert (appdata v)
             {
                 v2f o;
+
+				// make outline expand vertex by using normal values
 				float4 outline = float4(v.normal.x, v.normal.y, v.normal.z, 1) * _Outline;
+				// add to vertex value
 				o.vertex = v.vertex + outline ;
                 o.vertex = UnityObjectToClipPos(o.vertex);
                 return o;
@@ -74,7 +92,7 @@
 
         Pass
         {
-
+			// write to stencil
 			Stencil {
 				Ref 4
 				Comp always
@@ -124,6 +142,7 @@
 
             fixed4 frag (v2f i) : SV_Target
             {
+				// Phong lighting calculations
                float3 P = i.vertexInWorldCoords.xyz;
                 float3 N = normalize(i.normal);
                 float3 V = normalize(_WorldSpaceCameraPos - P);
@@ -157,7 +176,8 @@
                 
                 float4 texColor = tex2D(_MainTex, i.uv);
                 //FINAL COLOR OF FRAGMENT
-              
+				
+				// add emissive to final color
                 return float4(_EmmisiveColor * _Emissiveness + ambient+ diffuse + specular, 1.0)*texColor;
             }
             ENDCG

@@ -1,4 +1,8 @@
-﻿
+﻿/*
+*	Hill From Texture Shader
+*	Generates a terrain by displacing vertices according to the red values of a texture.
+*	Written by Angus Forbes and modified by Gigi Bachtel.
+*/
 Shader "Custom/HillFromTexture"
 {
     Properties
@@ -6,20 +10,18 @@ Shader "Custom/HillFromTexture"
         _Color ("Color", Color) = (1, 1, 1, 1) //The color of our object
         _Shininess ("Shininess", Float) = 32 //Shininess
         _SpecColor ("Specular Color", Color) = (1, 1, 1, 1) //Specular highlights color
-        _DirtTex ("DirtTexture", 2D) = "white" {}
-        _GrassTex ("GrassTexture", 2D) = "white" {}
-        _SnowTex ("SnowTexture", 2D) = "white" {}
-        _HeightMapTex ("HeightMapTexture", 2D) = "white" {}
+        _DirtTex ("DirtTexture", 2D) = "white" {} // dirt texture
+        _GrassTex ("GrassTexture", 2D) = "white" {} // grass texture
+        _SnowTex ("SnowTexture", 2D) = "white" {} // snow texture
+        _HeightMapTex ("HeightMapTexture", 2D) = "white" {} // texture to generate heightmap
         
-        _DisplacementAmt ("Displacement", Float) = 1.0 
+        _DisplacementAmt ("Displacement", Float) = 1.0  // amount to displace vertices by
     }
     
     SubShader
     {
         Pass {
-            Tags { "LightMode" = "ForwardAdd" } //Important! In Unity, point lights are calculated in the the ForwardAdd pass
-            // Blend One One //Turn on additive blending if you have more than one point light
-          
+            Tags { "LightMode" = "ForwardAdd" } //Important! In Unity, point lights are calculated in the the ForwardAdd pass          
             Cull off
             
             CGPROGRAM
@@ -65,13 +67,14 @@ Shader "Custom/HillFromTexture"
                 //see http://developer.download.nvidia.com/cg/tex2Dlod.html
                 float3 hmVal = tex2Dlod(_HeightMapTex, float4(v.uv, 0, 0)).rgb;
                 
+				// get the displacement value of this vertex
                 float vDisplace = hmVal.r * _DisplacementAmt; 
-                float4 newPosition = float4((v.vertex.xyz + v.normal.xyz * vDisplace).xyz, 1.0);
+                float4 newPosition = float4((v.vertex.xyz + v.normal.xyz * vDisplace).xyz, 1.0); // multiply to get the new vertex coordinate
       
                 
                 o.vertexInWorldCoords = mul(unity_ObjectToWorld, newPosition); //Vertex position in WORLD coords
                 o.normal = UnityObjectToWorldNormal(v.normal); //Normal vector in WORLD coords 
-                o.vertex = UnityObjectToClipPos(newPosition); 
+                o.vertex = UnityObjectToClipPos(newPosition);
                 o.uv = v.uv;
                 o.heightVal = newPosition.y;
                 
@@ -83,6 +86,7 @@ Shader "Custom/HillFromTexture"
            fixed4 frag(v2f i) : SV_Target
            {
                 
+				// Phong lighting calculations
                 float3 P = i.vertexInWorldCoords.xyz;
                 float3 N = normalize(i.normal);
                 float3 V = normalize(_WorldSpaceCameraPos - P);
@@ -90,7 +94,6 @@ Shader "Custom/HillFromTexture"
                 float3 H = normalize(L + V);
                 
                 float3 Kd = _Color.rgb; //Color of object
-                //float3 Ka = UNITY_LIGHTMODEL_AMBIENT.rgb; //Ambient light
                 float3 Ka = float3(0,0,0); //UNITY_LIGHTMODEL_AMBIENT.rgb; //Ambient light
                 float3 Ks = _SpecColor.rgb; //Color of specular highlighting
                 float3 Kl = _LightColor0.rgb; //Color of light
@@ -119,7 +122,7 @@ Shader "Custom/HillFromTexture"
                 
                 
                 
-               
+               // lerp between textures based on height
                 float3 dirt = tex2D(_DirtTex, i.uv).rgb;
                 float3 grass = tex2D(_GrassTex, i.uv).rgb;
                 float3 snow = tex2D(_SnowTex, i.uv).rgb;
